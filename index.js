@@ -23,7 +23,9 @@ async function run() {
     try {
         await client.connect();
         const carCollection = client.db('warehouse').collection('car');
+        
 
+        // get
         app.get('/car', async (req, res) => {
             const query = {};
             const cursor = carCollection.find(query);
@@ -31,19 +33,43 @@ async function run() {
             res.send(cars);
         });
 
-        app.get('/car/:id', async (req, res) => {
+        app.get('/car/:id' , async(req, res) => {
             const id = req.params.id;
-            const query = { _id: ObjectId(id) };
-            const cars = await carCollection.findOne(query);
-            res.send(cars);
+            const query = {_id: ObjectId(id)};
+            const item = await carCollection.findOne(query);
+            res.send(item);
         });
 
-
+        // post
         app.post('/car', async (req, res) => {
             const newItem = req.body;
             const result = await carCollection.insertOne(newItem);
             res.send(result)
         });
+
+        //DELETE
+        app.delete('/car/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await carCollection.deleteOne(query);
+            res.send(result);
+        })
+
+
+        //deliverd and stock
+        app.put('/car/:id', async(req, res) => {
+            const id = req.params.id;
+            const updateQuantity = req.body;
+            const filter = {_id: ObjectId(id)};
+            const options = {upsert: true};
+            const updateDoc = {
+                $set:{
+                    quantity: updateQuantity.quantity
+                }
+            }
+            const result = await carCollection.updateOne(filter,updateDoc,options);
+            res.send(result);
+        })
 
     }
     finally {
