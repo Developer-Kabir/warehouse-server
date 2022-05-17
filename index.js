@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
 
@@ -13,23 +13,40 @@ app.use(express.json());
 
 
 
-const uri = `mongodb+srv://${process.env.DB_User}:${process.env.DB_PASSWORD}@cluster0.hkeao.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+
+
+const uri = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0-shard-00-00.hkeao.mongodb.net:27017,cluster0-shard-00-01.hkeao.mongodb.net:27017,cluster0-shard-00-02.hkeao.mongodb.net:27017/?ssl=true&replicaSet=atlas-7i6kd9-shard-0&authSource=admin&retryWrites=true&w=majority`;
+
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-async function run () {
-    try{
+async function run() {
+    try {
         await client.connect();
         const carCollection = client.db('warehouse').collection('car');
 
-        app.get('/car' , async(req, res) => {
+        app.get('/car', async (req, res) => {
             const query = {};
             const cursor = carCollection.find(query);
             const cars = await cursor.toArray();
             res.send(cars);
         });
 
+        app.get('/car/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const cars = await carCollection.findOne(query);
+            res.send(cars);
+        });
+
+
+        app.post('/car', async (req, res) => {
+            const newItem = req.body;
+            const result = await carCollection.insertOne(newItem);
+            res.send(result)
+        });
+
     }
-    finally{
+    finally {
 
     }
 }
