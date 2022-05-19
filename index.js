@@ -67,6 +67,7 @@ async function run() {
             res.send(item);
         });
 
+
         // post
         app.post('/car', async (req, res) => {
             const newItem = req.body;
@@ -85,8 +86,8 @@ async function run() {
         app.delete('/car/:id', async(req, res) => {
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
-            const result = await carCollection.deleteOne(query);
-            res.send(result);
+            const cars = await carCollection.deleteOne(query);
+            res.send(cars);
         })
 
         //myitem
