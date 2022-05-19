@@ -12,23 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 
-function verifyJWT(req, res, next){
-    const authHeader = req.header.authorization;
-    if (!authHeader) {
-        return res.status(401).send({message: 'unauthorized access'})
-    }
-    const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-        if (err) {
-            return res.status(403).send({message: 'forbidden access'})
-        }
-        console.log('decoded', decoded);
-        req.decoded = decoded;
-        next();
 
-    })
-   
-}
 
 
 const uri = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0-shard-00-00.hkeao.mongodb.net:27017,cluster0-shard-00-01.hkeao.mongodb.net:27017,cluster0-shard-00-02.hkeao.mongodb.net:27017/?ssl=true&replicaSet=atlas-7i6kd9-shard-0&authSource=admin&retryWrites=true&w=majority`;
@@ -41,14 +25,7 @@ async function run() {
         const carCollection = client.db('warehouse').collection('car');
         const addCarCollection = client.db('warehouse').collection('addCar');
         
-         //AUTH
-         app.post('/login' , async(req, res) => {
-            const user = req.body;
-            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-                expiresIn: '1d'
-            });
-            res.send({accessToken});
-        })
+        
 
         // get
         app.get('/car', async (req, res) => {
